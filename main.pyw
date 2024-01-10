@@ -11,12 +11,18 @@ ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 
 def hold_keys(keys):
     for key in keys:
-        keyboard.press(key)
+        if '[' in key and len(key) > 1:
+            keyboard.press(key[1])
+        else:
+            keyboard.press(key)
 
 
 def release_keys(keys):
     for key in keys:
-        keyboard.release(key)
+        if '[' in key and len(key) > 1:
+            keyboard.release(key[1])
+        else:
+            keyboard.release(key)
 
 
 def main():
@@ -55,10 +61,6 @@ def main():
                     delete_note = True
                     if delete_note:
                         communique = 'DELETE'
-                    elif recording_notes:
-                        communique = 'RECORD'
-                    else:
-                        communique = 'PLAY NOTES'
                 elif event.key == pygame.K_ESCAPE:
                     active = not active
                     if not active:
@@ -88,21 +90,22 @@ def main():
                 if key_pressed:
                     gui.delete_action(actions, note, window, actions_json)
                     delete_note = False
+                    if recording_notes:
+                        communique = 'RECORD'
+                    else:
+                        communique = 'PLAY NOTES'
             else:
                 if key_pressed:
-                    if delete_note:
-                        gui.delete_action(actions, note, actions_json)
+                    if last_note in actions:
+                        gui.change_top_color(gui.GREEN)
                     else:
-                        if last_note in actions:
-                            gui.change_top_color(gui.GREEN)
-                        else:
-                            gui.change_top_color(gui.YELLOW)
-                        if gui.read_action(actions, note, window, recording_notes, actions_json) and last_note is not None:
-                            try:
-                                hold_keys(actions[last_note])
-                                release_keys(actions[last_note])
-                            except KeyError:
-                                pass
+                        gui.change_top_color(gui.YELLOW)
+                    if gui.read_action(actions, note, window, recording_notes, actions_json) and last_note is not None:
+                        try:
+                            hold_keys(actions[last_note])
+                            release_keys(actions[last_note])
+                        except KeyError:
+                            pass
                 else:
                     if recording_notes:
                         gui.change_top_color(gui.BLUE)
