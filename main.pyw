@@ -5,7 +5,7 @@ import midi_read
 import keyboard
 
 import ctypes
-myappid = 'mycompany.myproduct.subproduct.version'
+myappid = 'OFAL.MIDI-HotKey.main.1'
 ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 
 
