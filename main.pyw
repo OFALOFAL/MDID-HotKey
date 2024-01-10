@@ -68,7 +68,7 @@ def main():
                     elif recording_notes:
                         communique = 'RECORD'
                     else:
-                        communique = 'PLAY NOTES'
+                        communique = 'PLAY'
                 elif event.key == pygame.K_TAB:
                     recording_notes = not recording_notes
                     if recording_notes:
