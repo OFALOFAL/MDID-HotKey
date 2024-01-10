@@ -55,6 +55,10 @@ def main():
                     delete_note = True
                     if delete_note:
                         communique = 'DELETE'
+                    elif recording_notes:
+                        communique = 'RECORD'
+                    else:
+                        communique = 'PLAY NOTES'
                 elif event.key == pygame.K_ESCAPE:
                     active = not active
                     if not active:
