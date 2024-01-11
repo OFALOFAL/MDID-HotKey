@@ -3,10 +3,15 @@ import sys
 import gui
 import midi_read
 import keyboard
-
 import ctypes
+import update_data
+
 myappid = 'OFAL.MIDI-HotKey.main.1'
 ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+
+
+def read_action(actions, note, recording_notes, last_note):
+    return not (note not in actions and note is not None and recording_notes) and last_note is not None
 
 
 def hold_keys(keys):
@@ -27,7 +32,7 @@ def release_keys(keys):
 
 def main():
     actions_json = 'actions.json'
-    actions = gui.load_actions_from_json(actions_json)
+    actions = update_data.load_actions_from_json(actions_json)
 
     # Initialize Pygame
     pygame.init()
@@ -50,7 +55,7 @@ def main():
 
     communique = 'PLAY'
 
-    while True:
+    while note != 'C1':
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 midiin.closePort()
@@ -88,24 +93,31 @@ def main():
             if delete_note:
                 gui.change_top_color(gui.RED)
                 if key_pressed:
-                    gui.delete_action(actions, note, window, actions_json)
+                    gui.delete_action(actions, note, window)
+                    update_data.save_actions_to_json(actions, actions_json)
                     delete_note = False
                     if recording_notes:
                         communique = 'RECORD'
                     else:
-                        communique = 'PLAY NOTES'
+                        communique = 'PLAY'
             else:
                 if key_pressed:
                     if last_note in actions:
                         gui.change_top_color(gui.GREEN)
                     else:
                         gui.change_top_color(gui.YELLOW)
-                    if gui.read_action(actions, note, window, recording_notes, actions_json) and last_note is not None:
+                    if read_action(actions, note, recording_notes, last_note):
                         try:
                             hold_keys(actions[last_note])
                             release_keys(actions[last_note])
                         except KeyError:
                             pass
+                    else:
+                        key_action = gui.read_input(note)
+                        if key_action:
+                            actions[note] = key_action
+                            update_data.save_actions_to_json(actions, actions_json)
+                            gui.extend_window(window)
                 else:
                     if recording_notes:
                         gui.change_top_color(gui.BLUE)
@@ -122,6 +134,10 @@ def main():
 
         # Update the display
         pygame.display.flip()
+
+    midiin.closePort()
+    pygame.quit()
+    sys.exit()
 
 
 main()

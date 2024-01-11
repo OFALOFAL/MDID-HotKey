@@ -1,8 +1,7 @@
 import pygame
-import json
 
 # GUI-related constants
-window_size = [600, 250]
+window_size = [600, 310]
 TOP_SEGMENT_HEIGHT = 50
 TOP_SEGMENT_COLOR = (50, 50, 255)
 BOTTOM_SEGMENT_COLOR = (255, 255, 255)
@@ -15,19 +14,9 @@ YELLOW = (230, 200, 55)
 LIGHTBLUE = (153, 186, 220)
 
 
-def load_actions_from_json(filename):
-    try:
-        with open(filename, 'r') as file:
-            return json.load(file)
-    except FileNotFoundError:
-        return {}
-    except json.decoder.JSONDecodeError:
-        return {}
-
-
-def save_actions_to_json(actions, filename):
-    with open(filename, 'w') as file:
-        json.dump(actions, file, indent=2)
+def change_top_color(new_color):
+    global TOP_SEGMENT_COLOR
+    TOP_SEGMENT_COLOR = new_color
 
 
 def read_input(note):
@@ -76,37 +65,23 @@ def read_input(note):
     return actions
 
 
-def read_action(actions, note, window, recording_notes, filename):
-    if note not in actions and note is not None and recording_notes:
-        key_action = read_input(note)
-
-        if key_action:
-            actions[note] = key_action
-            window_size[1] += 30
-            new_window = pygame.display.set_mode(window_size)
-            pygame.transform.scale(window, window_size, new_window)
-            save_actions_to_json(actions, filename)
-        return False
-    return True
+def extend_window(window):
+    window_size[1] += 30
+    new_window = pygame.display.set_mode(window_size)
+    pygame.transform.scale(window, window_size, new_window)
 
 
-def delete_action(actions, note, window, filename):
+def delete_action(actions, note, window):
     if note in actions and note is not None:
         try:
             actions.pop(note)
             window_size[1] -= 30
             new_window = pygame.display.set_mode(window_size)
             pygame.transform.scale(window, window_size, new_window)
-            save_actions_to_json(actions, filename)
         except KeyError:
             pass
     else:
         pass
-
-
-def change_top_color(new_color):
-    global TOP_SEGMENT_COLOR
-    TOP_SEGMENT_COLOR = new_color
 
 
 def calculate_centered_x(text_width):
@@ -121,9 +96,17 @@ def draw_segments(window, communique, recording_notes, active):
     text = font.render(str(communique), True, WHITE)
     window.blit(text, (10, 10))
 
+    fsize = 28
+    font = pygame.font.Font(None, fsize)
+
+    text = font.render("Keyboard", True, BLACK)
+    text_width, text_height = font.size("Keyboard")
+    window.blit(text, (calculate_centered_x(text_width), TOP_SEGMENT_HEIGHT + 5))
+
     yoffset = 35
     fsize = 24
     font = pygame.font.Font(None, fsize)
+
 
     text = font.render("DELETE - remove a note", True, BLACK)
     text_width, text_height = font.size("DELETE - remove a note")
@@ -139,10 +122,23 @@ def draw_segments(window, communique, recording_notes, active):
     text_width, text_height = font.size(f"ESC - {info} hotkeys")
     window.blit(text, (calculate_centered_x(text_width), TOP_SEGMENT_HEIGHT + yoffset + fsize * 2))
 
+    fsize = 28
+    font = pygame.font.Font(None, fsize)
+
+    text = font.render("MIDI Controller", True, BLACK)
+    text_width, text_height = font.size("MIDI Controller")
+    window.blit(text, (calculate_centered_x(text_width), TOP_SEGMENT_HEIGHT + yoffset + 90))
+
+    fsize = 24
+    font = pygame.font.Font(None, fsize)
+    text = font.render("C1 - exit program", True, BLACK)
+    text_width, text_height = font.size("C1 - exit program")
+    window.blit(text, (calculate_centered_x(text_width), TOP_SEGMENT_HEIGHT + yoffset + fsize * 5 - 3))
+
 
 def display_hotkeys(window, actions):
     # Display hotkey associations
-    yoffset = 150
+    yoffset = 220
     fsize = 28
     font = pygame.font.Font(None, fsize)
     text = font.render('HOTKEYS:', True, BLACK)
