@@ -15,6 +15,7 @@ python no_gui.py
 ```
 
 The program will exit after you hit C1 on your MIDI controller (even if run in background).  
+If you have trouble with connecting to your desired MIDI controller make sure to unplun unnecessary MIDI devices.  
 
 ---
 
